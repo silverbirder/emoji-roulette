@@ -2,7 +2,6 @@ import {
   index,
   pgTableCreator,
   serial,
-  timestamp,
   varchar,
   boolean,
 } from "drizzle-orm/pg-core";
