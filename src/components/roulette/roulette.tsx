@@ -98,14 +98,14 @@ export const Roulette = ({ roulette }: Props) => {
           <Button onClick={addParticipant}>Add</Button>
         </div>
         <div className="space-y-2">
-          {participants.map((participant, index) => (
+          {participants.map((participant) => (
             <div
-              key={index}
+              key={participant.uuid}
               className={`flex items-center justify-between rounded p-2 ${
                 participant.isHit ? "bg-gray-300 text-gray-600" : "bg-muted"
               }`}
             >
-              {editingParticipant === participant.participantName ? (
+              {editingParticipant === participant.uuid ? (
                 <div className="flex flex-grow items-center space-x-2">
                   <Input
                     type="text"
@@ -115,9 +115,7 @@ export const Roulette = ({ roulette }: Props) => {
                     placeholder="Name"
                   />
                   <Button
-                    onClick={() =>
-                      handleEditSubmit(participant.participantName)
-                    }
+                    onClick={() => handleEditSubmit(participant.uuid)}
                     size="sm"
                   >
                     Save
@@ -138,20 +136,25 @@ export const Roulette = ({ roulette }: Props) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleEditClick(participant.participantName)}
+                  onClick={() =>
+                    handleEditClick(
+                      participant.uuid,
+                      participant.participantName,
+                    )
+                  }
                   aria-label={`Edit ${participant.participantName}`}
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
                 <Switch
-                  id={`hit-toggle-${index}`}
+                  id={`hit-toggle-${participant.uuid}`}
                   checked={participant.isHit}
-                  onCheckedChange={() => toggleParticipantHit(participant)}
+                  onCheckedChange={() => toggleParticipantHit(participant.uuid)}
                 />
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => removeParticipant(index)}
+                  onClick={() => removeParticipant(participant.uuid)}
                   aria-label={`Remove ${participant.participantName}`}
                 >
                   <Trash2 className="h-4 w-4" />

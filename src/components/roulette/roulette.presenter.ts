@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import JSConfetti from "js-confetti";
+import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 
 export interface Participant {
+  uuid: string;
   participantName: string;
   emoji: string;
   isHit: boolean;
@@ -27,7 +29,9 @@ type Props = {
 export function useRoulettePresenter({ roulette }: Props) {
   const [participants, setParticipants] = useState<Participant[]>(
     roulette?.participants.map((participant) => ({
-      ...participant,
+      uuid: uuidv4(),
+      participantName: participant.participantName,
+      emoji: participant.emoji,
       isHit: !!participant.isHit,
     })) ?? [],
   );
@@ -76,14 +80,19 @@ export function useRoulettePresenter({ roulette }: Props) {
     if (newParticipantName) {
       setParticipants((prev) => [
         ...prev,
-        { participantName: newParticipantName, emoji: "😊", isHit: false },
+        {
+          uuid: uuidv4(),
+          participantName: newParticipantName,
+          emoji: "😊",
+          isHit: false,
+        },
       ]);
       setNewParticipantName("");
     }
   }, [newParticipantName]);
 
-  const removeParticipant = useCallback((index: number) => {
-    setParticipants((prev) => prev.filter((_, i) => i !== index));
+  const removeParticipant = useCallback((uuid: string) => {
+    setParticipants((prev) => prev.filter((p) => p.uuid !== uuid));
   }, []);
 
   const handleEmojiClick = useCallback(
@@ -91,7 +100,7 @@ export function useRoulettePresenter({ roulette }: Props) {
       if (selectedParticipant) {
         setParticipants((prev) =>
           prev.map((p) =>
-            p.participantName === selectedParticipant.participantName
+            p.uuid === selectedParticipant.uuid
               ? { ...p, emoji: emojiObject.emoji }
               : p,
           ),
@@ -103,43 +112,37 @@ export function useRoulettePresenter({ roulette }: Props) {
     [selectedParticipant],
   );
 
-  const toggleParticipantHit = useCallback((participant: Participant) => {
+  const toggleParticipantHit = useCallback((uuid: string) => {
     setParticipants((prev) =>
-      prev.map((p) =>
-        p.participantName === participant.participantName
-          ? { ...p, isHit: !p.isHit }
-          : p,
-      ),
+      prev.map((p) => (p.uuid === uuid ? { ...p, isHit: !p.isHit } : p)),
     );
   }, []);
 
-  const editParticipantName = useCallback(
-    (oldName: string, newName: string) => {
-      if (newName && !participants.some((p) => p.participantName === newName)) {
-        setParticipants((prev) =>
-          prev.map((p) =>
-            p.participantName === oldName
-              ? { ...p, participantName: newName }
-              : p,
-          ),
-        );
-      }
-    },
-    [participants],
-  );
+  const editParticipantName = useCallback((uuid: string, newName: string) => {
+    if (newName) {
+      setParticipants((prev) =>
+        prev.map((p) =>
+          p.uuid === uuid ? { ...p, participantName: newName } : p,
+        ),
+      );
+    }
+  }, []);
 
   const handleChangeEditName = useCallback((editName: string) => {
     setEditName(editName);
   }, []);
 
-  const handleEditClick = useCallback((participantName: string) => {
-    setEditingParticipant(participantName);
-    setEditName(participantName);
-  }, []);
+  const handleEditClick = useCallback(
+    (uuid: string, participantName: string) => {
+      setEditingParticipant(uuid);
+      setEditName(participantName);
+    },
+    [],
+  );
 
   const handleEditSubmit = useCallback(
-    (oldName: string) => {
-      editParticipantName(oldName, editName);
+    (uuid: string) => {
+      editParticipantName(uuid, editName);
       setEditingParticipant(null);
       setEditName("");
     },
@@ -167,7 +170,7 @@ export function useRoulettePresenter({ roulette }: Props) {
           Math.floor(Math.random() * availableParticipants.length)
         ];
       const globalIndex = participants.findIndex(
-        (p) => p.participantName === randomParticipant?.participantName,
+        (p) => p.uuid === randomParticipant?.uuid,
       );
       setPrizeNumber(globalIndex);
       setIsSpinning(true);
