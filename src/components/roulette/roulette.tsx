@@ -7,7 +7,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import dynamic from "next/dynamic";
 import { useRoulettePresenter } from "./roulette.presenter";
-import { Pencil, Trash2, RotateCcw, Save, Trophy, Zap } from "lucide-react";
+import {
+  Pencil,
+  Trash2,
+  RotateCcw,
+  Save,
+  Trophy,
+  Zap,
+  CheckCircle2,
+  X,
+} from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
+import Link from "next/link";
 
 const EmojiPicker = dynamic(
   () => import("emoji-picker-react").then((mod) => mod.default),
@@ -60,6 +71,9 @@ export const Roulette = ({ roulette }: Props) => {
     selectWinner,
     wheelData,
     saveState,
+    showSuccessAlert,
+    savedUrl,
+    closeSuccessAlert,
   } = useRoulettePresenter({ roulette });
 
   return (
@@ -88,6 +102,36 @@ export const Roulette = ({ roulette }: Props) => {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {showSuccessAlert && (
+          <Alert className="relative bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-lg">
+            <div className="pr-8">
+              <CheckCircle2 className="h-5 w-5 text-white" />
+              <AlertTitle className="mb-2 text-lg font-bold">
+                Success!
+              </AlertTitle>
+              <AlertDescription className="text-white/90">
+                <p>
+                  The roulette state has been saved.You can use this URL to
+                  access the saved roulette.
+                </p>
+                <Link
+                  href={savedUrl}
+                  className="break-all font-medium text-white underline transition-colors hover:text-emerald-100"
+                >
+                  {savedUrl}
+                </Link>
+              </AlertDescription>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-2 top-2 text-white hover:bg-white/20 hover:text-emerald-100"
+              onClick={closeSuccessAlert}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </Alert>
+        )}
         <div className="flex space-x-2">
           <Input
             type="text"

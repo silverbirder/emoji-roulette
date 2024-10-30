@@ -8,7 +8,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { Footer } from "@/components/footer";
 
+const baseUrl = process.env.BASE_URL ?? "https://emoji-roulette.vercel.app";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
   robots: {
     index: true,
   },

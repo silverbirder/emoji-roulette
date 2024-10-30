@@ -3,7 +3,7 @@ import JSConfetti from "js-confetti";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/trpc/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export interface Participant {
   uuid: string;
@@ -50,12 +50,15 @@ export function useRoulettePresenter({ roulette }: Props) {
     top: number;
     left: number;
   } | null>(null);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [savedUrl, setSavedUrl] = useState("");
 
   const jsConfettiRef = useRef<JSConfetti | null>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
 
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     jsConfettiRef.current = new JSConfetti();
@@ -203,11 +206,12 @@ export function useRoulettePresenter({ roulette }: Props) {
 
   const saveRoulette = api.roulette.saveRoulette.useMutation({
     onSuccess: ({ hash }) => {
+      const newUrl = `/roulettes/${hash}?showAlert=true`;
       toast({
         title: "State Saved",
         description: "The current roulette state has been saved.",
       });
-      router.push(`/roulettes/${hash}`);
+      router.push(newUrl);
     },
   });
 
@@ -217,6 +221,20 @@ export function useRoulettePresenter({ roulette }: Props) {
       participants,
     });
   }, [participants, saveRoulette, roulette?.id]);
+
+  const closeSuccessAlert = useCallback(() => {
+    setShowSuccessAlert(false);
+  }, []);
+
+  useEffect(() => {
+    if (searchParams.get("showAlert") === "true") {
+      setShowSuccessAlert(true);
+      const newUrl = `/roulettes/${roulette?.hash}`;
+      const fullUrl = `${window.location.origin}${newUrl}`;
+      setSavedUrl(fullUrl);
+      router.replace(newUrl);
+    }
+  }, [searchParams, roulette?.hash, router]);
 
   const wheelData = useMemo(
     () =>
@@ -274,5 +292,8 @@ export function useRoulettePresenter({ roulette }: Props) {
     selectWinner,
     wheelData,
     saveState,
+    showSuccessAlert,
+    savedUrl,
+    closeSuccessAlert,
   };
 }
