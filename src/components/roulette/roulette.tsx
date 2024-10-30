@@ -10,7 +10,7 @@ import { useRoulettePresenter } from "./roulette.presenter";
 import {
   Pencil,
   Trash2,
-  RotateCcw,
+  ToggleLeft,
   Save,
   Trophy,
   Zap,
@@ -88,7 +88,7 @@ export const Roulette = ({ roulette }: Props) => {
             title="Reset Selection"
             className="text-yellow-600 hover:text-yellow-700"
           >
-            <RotateCcw className="h-4 w-4" />
+            <ToggleLeft className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
