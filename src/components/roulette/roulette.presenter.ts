@@ -133,6 +133,10 @@ export function useRoulettePresenter({ roulette }: Props) {
     [participants],
   );
 
+  const handleChangeEditName = useCallback((editName: string) => {
+    setEditName(editName);
+  }, []);
+
   const handleEditClick = useCallback((participantName: string) => {
     setEditingParticipant(participantName);
     setEditName(participantName);
@@ -263,6 +267,7 @@ export function useRoulettePresenter({ roulette }: Props) {
     removeParticipant,
     handleEmojiClick,
     toggleParticipantHit,
+    handleChangeEditName,
     handleEditClick,
     handleEditSubmit,
     handleEmojiButtonClick,

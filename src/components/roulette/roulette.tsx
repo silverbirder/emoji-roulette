@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import dynamic from "next/dynamic";
 import { useRoulettePresenter } from "./roulette.presenter";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 
 const EmojiPicker = dynamic(
   () => import("emoji-picker-react").then((mod) => mod.default),
@@ -54,6 +54,7 @@ export const Roulette = ({ roulette }: Props) => {
     handleEditClick,
     handleEditSubmit,
     handleEmojiButtonClick,
+    handleChangeEditName,
     spinRoulette,
     resetSelection,
     selectWinner,
@@ -89,12 +90,13 @@ export const Roulette = ({ roulette }: Props) => {
               }`}
             >
               {editingParticipant === participant.participantName ? (
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-grow items-center space-x-2">
                   <Input
                     type="text"
                     value={editName}
-                    onChange={(e) => handleEditClick(e.target.value)}
-                    className="w-40"
+                    onChange={(e) => handleChangeEditName(e.target.value)}
+                    className="flex-grow"
+                    placeholder="Name"
                   />
                   <Button
                     onClick={() =>
@@ -106,47 +108,38 @@ export const Roulette = ({ roulette }: Props) => {
                   </Button>
                 </div>
               ) : (
-                <span className="flex items-center space-x-2">
-                  <span>{participant.participantName}</span>
-                  <span>{participant.emoji}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEditClick(participant.participantName)}
-                    aria-label={`Edit ${participant.participantName}`}
+                <div className="flex flex-grow items-center space-x-2">
+                  <button
+                    className="text-2xl"
+                    onClick={(e) => handleEmojiButtonClick(participant, e)}
                   >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                </span>
+                    {participant.emoji}
+                  </button>
+                  <span>{participant.participantName}</span>
+                </div>
               )}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center space-x-2">
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={(e) => handleEmojiButtonClick(participant, e)}
+                  onClick={() => handleEditClick(participant.participantName)}
+                  aria-label={`Edit ${participant.participantName}`}
                 >
-                  Change Emoji
+                  <Pencil className="h-4 w-4" />
                 </Button>
+                <Switch
+                  id={`hit-toggle-${index}`}
+                  checked={participant.isHit}
+                  onCheckedChange={() => toggleParticipantHit(participant)}
+                />
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => removeParticipant(participant)}
+                  aria-label={`Remove ${participant.participantName}`}
                 >
-                  Remove
+                  <Trash2 className="h-4 w-4" />
                 </Button>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id={`hit-toggle-${index}`}
-                    checked={participant.isHit}
-                    onCheckedChange={() => toggleParticipantHit(participant)}
-                  />
-                  <label
-                    htmlFor={`hit-toggle-${index}`}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Hit
-                  </label>
-                </div>
               </div>
             </div>
           ))}
