@@ -1,6 +1,6 @@
 // import Link from "next/link";
 
-import Roulette from "@/components/ui/roulette";
+import { Roulette } from "@/components/roulette";
 
 // import { LatestPost } from "@/app/_components/post";
 // import { api, HydrateClient } from "@/trpc/server";
