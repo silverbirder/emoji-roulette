@@ -73,22 +73,17 @@ export function useRoulettePresenter({ roulette }: Props) {
   );
 
   const addParticipant = useCallback(() => {
-    if (
-      newParticipantName &&
-      !participants.some((p) => p.participantName === newParticipantName)
-    ) {
+    if (newParticipantName) {
       setParticipants((prev) => [
         ...prev,
         { participantName: newParticipantName, emoji: "😊", isHit: false },
       ]);
       setNewParticipantName("");
     }
-  }, [newParticipantName, participants]);
+  }, [newParticipantName]);
 
-  const removeParticipant = useCallback((participant: Participant) => {
-    setParticipants((prev) =>
-      prev.filter((p) => p.participantName !== participant.participantName),
-    );
+  const removeParticipant = useCallback((index: number) => {
+    setParticipants((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   const handleEmojiClick = useCallback(

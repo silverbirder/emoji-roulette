@@ -135,7 +135,7 @@ export const Roulette = ({ roulette }: Props) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => removeParticipant(participant)}
+                  onClick={() => removeParticipant(index)}
                   aria-label={`Remove ${participant.participantName}`}
                 >
                   <Trash2 className="h-4 w-4" />

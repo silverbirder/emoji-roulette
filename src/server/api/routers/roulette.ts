@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { randomBytes } from "crypto";
-import { eq, and } from "drizzle-orm/expressions";
+import { eq, and, notInArray } from "drizzle-orm/expressions";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { roulettes, rouletteParticipants } from "@/server/db/schema";
 
@@ -49,6 +49,8 @@ export const rouletteRouter = createTRPCRouter({
       }
 
       if (rouletteId) {
+        const updatedParticipantIds: number[] = [];
+
         for (const participant of participants) {
           if (participant.id) {
             await ctx.db
@@ -64,15 +66,31 @@ export const rouletteRouter = createTRPCRouter({
                   eq(rouletteParticipants.rouletteId, rouletteId),
                 ),
               );
+            updatedParticipantIds.push(participant.id);
           } else {
-            await ctx.db.insert(rouletteParticipants).values({
-              participantName: participant.participantName,
-              emoji: participant.emoji,
-              isHit: participant.isHit,
-              rouletteId,
-            });
+            const [newParticipant] = await ctx.db
+              .insert(rouletteParticipants)
+              .values({
+                participantName: participant.participantName,
+                emoji: participant.emoji,
+                isHit: participant.isHit,
+                rouletteId,
+              })
+              .returning();
+            if (newParticipant?.id) {
+              updatedParticipantIds.push(newParticipant.id);
+            }
           }
         }
+
+        await ctx.db
+          .delete(rouletteParticipants)
+          .where(
+            and(
+              eq(rouletteParticipants.rouletteId, rouletteId),
+              notInArray(rouletteParticipants.id, updatedParticipantIds),
+            ),
+          );
       }
 
       return { hash, id: rouletteId };
