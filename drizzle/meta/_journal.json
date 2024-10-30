@@ -8,6 +8,13 @@
       "when": 1730212543948,
       "tag": "0001_mysterious_black_cat",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1730272597830,
+      "tag": "0002_dark_loki",
+      "breakpoints": true
     }
   ]
 }

@@ -25,7 +25,7 @@ export const rouletteParticipants = createTable(
   {
     id: serial("id").primaryKey(),
     participantName: varchar("participant_name", { length: 256 }).notNull(),
-    emoji: varchar("emoji", { length: 2 }).notNull(),
+    emoji: varchar("emoji", { length: 4 }).notNull(),
     isHit: boolean("is_hit").default(false),
     rouletteId: serial("roulette_id")
       .references(() => roulettes.id)

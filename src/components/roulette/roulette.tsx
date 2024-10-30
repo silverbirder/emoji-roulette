@@ -1,12 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import dynamic from "next/dynamic";
-import { useRoulettePresenter } from "./roulette.presenter";
+import { type Participant, useRoulettePresenter } from "./roulette.presenter";
+import { Pencil } from "lucide-react";
 
 const EmojiPicker = dynamic(
   () => import("emoji-picker-react").then((mod) => mod.default),
@@ -52,6 +53,7 @@ export const Roulette = ({ roulette }: Props) => {
     removeParticipant,
     handleEmojiClick,
     toggleParticipantHit,
+    editParticipantName,
     spinRoulette,
     resetSelection,
     selectWinner,
@@ -59,7 +61,64 @@ export const Roulette = ({ roulette }: Props) => {
     saveState,
   } = useRoulettePresenter({ roulette });
 
+  const [editingParticipant, setEditingParticipant] = useState<string | null>(
+    null,
+  );
+  const [editName, setEditName] = useState("");
+  const [emojiPickerPosition, setEmojiPickerPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+
+  const emojiPickerRef = useRef<HTMLDivElement>(null); // Ref for EmojiPicker container
+
   const winnerStyle = "bg-yellow-400 text-yellow-900 font-semibold";
+
+  const handleEditClick = (participantName: string) => {
+    setEditingParticipant(participantName);
+    setEditName(participantName);
+  };
+
+  const handleEditSubmit = (oldName: string) => {
+    editParticipantName(oldName, editName);
+    setEditingParticipant(null);
+    setEditName("");
+  };
+
+  const handleEmojiButtonClick = (
+    participant: Participant,
+    event: React.MouseEvent<HTMLButtonElement>,
+  ) => {
+    const buttonRect = event.currentTarget.getBoundingClientRect();
+    setEmojiPickerPosition({
+      top: buttonRect.top + window.scrollY + buttonRect.height,
+      left: buttonRect.left + window.scrollX,
+    });
+    toggleEmojiPicker(true);
+    selectParticipantForEmoji(participant);
+  };
+
+  // Close EmojiPicker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(event.target as Node)
+      ) {
+        toggleEmojiPicker(false); // Close EmojiPicker if clicked outside
+      }
+    };
+
+    if (showEmojiPicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showEmojiPicker, toggleEmojiPicker]);
 
   return (
     <Card className="mx-auto w-full max-w-2xl">
@@ -86,17 +145,42 @@ export const Roulette = ({ roulette }: Props) => {
                 participant.isHit ? "bg-gray-300 text-gray-600" : "bg-muted"
               }`}
             >
-              <span>
-                {participant.participantName} {participant.emoji}
-              </span>
+              {editingParticipant === participant.participantName ? (
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="w-40"
+                  />
+                  <Button
+                    onClick={() =>
+                      handleEditSubmit(participant.participantName)
+                    }
+                    size="sm"
+                  >
+                    Save
+                  </Button>
+                </div>
+              ) : (
+                <span className="flex items-center space-x-2">
+                  <span>{participant.participantName}</span>
+                  <span>{participant.emoji}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEditClick(participant.participantName)}
+                    aria-label={`Edit ${participant.participantName}`}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </span>
+              )}
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => {
-                    toggleEmojiPicker(true);
-                    selectParticipantForEmoji(participant);
-                  }}
+                  onClick={(e) => handleEmojiButtonClick(participant, e)}
                 >
                   Change Emoji
                 </Button>
@@ -124,10 +208,19 @@ export const Roulette = ({ roulette }: Props) => {
             </div>
           ))}
         </div>
-        {showEmojiPicker && selectedParticipant && (
-          <div className="absolute z-10">
+        {showEmojiPicker && selectedParticipant && emojiPickerPosition && (
+          <div
+            ref={emojiPickerRef} // Attach ref to the EmojiPicker container
+            className="absolute z-10"
+            style={{
+              top: emojiPickerPosition.top,
+              left: emojiPickerPosition.left,
+            }}
+          >
             <EmojiPicker
               onEmojiClick={(emojiObject) => handleEmojiClick(emojiObject)}
+              autoFocusSearch={false}
+              lazyLoadEmojis={true}
             />
           </div>
         )}

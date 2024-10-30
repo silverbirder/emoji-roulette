@@ -1,0 +1,1 @@
+ALTER TABLE "emoji-roulette_roulette_participant" ALTER COLUMN "emoji" SET DATA TYPE varchar(4);

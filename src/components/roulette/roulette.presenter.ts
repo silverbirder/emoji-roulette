@@ -107,9 +107,24 @@ export function useRoulettePresenter({ roulette }: Props) {
     );
   }, []);
 
+  const editParticipantName = useCallback(
+    (oldName: string, newName: string) => {
+      if (newName && !participants.some((p) => p.participantName === newName)) {
+        setParticipants((prev) =>
+          prev.map((p) =>
+            p.participantName === oldName
+              ? { ...p, participantName: newName }
+              : p,
+          ),
+        );
+      }
+    },
+    [participants],
+  );
+
   const spinRoulette = useCallback(() => {
     const availableParticipants = participants.filter((p) => !p.isHit);
-    if (availableParticipants.length > 1 && !isSpinning) {
+    if (availableParticipants.length > 0 && !isSpinning) {
       const randomParticipant =
         availableParticipants[
           Math.floor(Math.random() * availableParticipants.length)
@@ -187,6 +202,7 @@ export function useRoulettePresenter({ roulette }: Props) {
     removeParticipant,
     handleEmojiClick,
     toggleParticipantHit,
+    editParticipantName,
     spinRoulette,
     resetSelection,
     selectWinner,
