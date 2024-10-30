@@ -160,30 +160,27 @@ export const Roulette = ({ roulette }: Props) => {
             </div>
           ))}
         </div>
-        <div
-          ref={emojiPickerRef}
-          className="absolute z-20 w-80 md:w-96"
-          style={{
-            top: emojiPickerPosition?.top,
-            left: emojiPickerPosition?.left,
-            display:
-              showEmojiPicker && selectedParticipant && emojiPickerPosition
-                ? "block"
-                : "none",
-          }}
-        >
-          <EmojiPicker
-            onEmojiClick={(emojiObject) => handleEmojiClick(emojiObject)}
-            autoFocusSearch={false}
-            lazyLoadEmojis={true}
-            width="100%"
-            className="relative"
-          />
-        </div>
-
+        {showEmojiPicker && selectedParticipant && emojiPickerPosition && (
+          <div
+            ref={emojiPickerRef}
+            className="absolute z-20 w-80 md:w-96"
+            style={{
+              top: emojiPickerPosition?.top,
+              left: emojiPickerPosition?.left,
+            }}
+          >
+            <EmojiPicker
+              onEmojiClick={(emojiObject) => handleEmojiClick(emojiObject)}
+              autoFocusSearch={false}
+              lazyLoadEmojis={true}
+              width="100%"
+              className="relative"
+            />
+          </div>
+        )}
         <div className="relative">
           {winner && (
-            <div className="z-10 absolute inset-0 flex items-center justify-center">
+            <div className="absolute inset-0 z-10 flex items-center justify-center">
               <div className="animate-fade-in rounded-lg bg-gradient-to-r from-yellow-400/90 to-orange-500/90 p-6 text-center shadow-lg backdrop-blur-sm">
                 <Trophy className="mx-auto mb-2 h-12 w-12 text-white" />
                 <h2 className="mb-2 text-2xl font-bold text-white">Winner!</h2>
