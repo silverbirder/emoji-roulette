@@ -23,6 +23,14 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
+      <head>
+        <link
+          rel="apple-touch-icon"
+          type="image/png"
+          href="/apple-touch-icon.png"
+        ></link>
+        <link rel="icon" type="image/png" href="/icon-192x192.png"></link>
+      </head>
       <body className="flex flex-col">
         <main>
           <TRPCReactProvider>{children}</TRPCReactProvider>
