@@ -11,14 +11,14 @@ const EmojiPicker = dynamic(
   () => import("emoji-picker-react").then((mod) => mod.default),
   {
     ssr: false,
-  }
+  },
 );
 
 const Wheel = dynamic(
   () => import("react-custom-roulette").then((mod) => mod.Wheel),
   {
     ssr: false,
-  }
+  },
 );
 
 export const Roulette = () => {
@@ -26,17 +26,23 @@ export const Roulette = () => {
     participants,
     newParticipantName,
     showEmojiPicker,
+    selectedParticipant,
     isSpinning,
     winner,
-    setNewParticipantName,
-    setShowEmojiPicker,
+    prizeNumber,
+    updateNewParticipantName,
+    toggleEmojiPicker,
+    selectParticipantForEmoji,
     addParticipant,
     removeParticipant,
+    handleEmojiClick,
     spinRoulette,
     resetSelection,
+    selectWinner,
     wheelData,
-    setIsSpinning,
   } = useRoulettePresenter();
+
+  const winnerStyle = "bg-yellow-400 text-yellow-900 font-semibold"; // Define winner style class
 
   return (
     <Card className="mx-auto w-full max-w-2xl">
@@ -51,8 +57,7 @@ export const Roulette = () => {
             type="text"
             placeholder="Participant Name"
             value={newParticipantName}
-            onChange={(e) => setNewParticipantName(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && addParticipant()}
+            onChange={(e) => updateNewParticipantName(e.target.value)}
           />
           <Button onClick={addParticipant}>Add</Button>
         </div>
@@ -60,7 +65,11 @@ export const Roulette = () => {
           {participants.map((participant, index) => (
             <div
               key={index}
-              className="bg-muted flex items-center justify-between rounded p-2"
+              className={`flex items-center justify-between rounded p-2 ${
+                participant.isHit
+                  ? "bg-gray-300 text-gray-600" // Style for hit participants
+                  : "bg-muted"
+              }`}
             >
               <span>
                 {participant.name} {participant.emoji}
@@ -69,7 +78,10 @@ export const Roulette = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setShowEmojiPicker(true)}
+                  onClick={() => {
+                    toggleEmojiPicker(true);
+                    selectParticipantForEmoji(participant);
+                  }}
                 >
                   Change Emoji
                 </Button>
@@ -84,24 +96,20 @@ export const Roulette = () => {
             </div>
           ))}
         </div>
-        {showEmojiPicker && (
+        {showEmojiPicker && selectedParticipant && (
           <div className="absolute z-10">
             <EmojiPicker
-            // onEmojiClick={(emojiObject) =>
-            //   // handleEmojiClick(emojiObject, part)
-            // }
+              onEmojiClick={(emojiObject) => handleEmojiClick(emojiObject)}
             />
           </div>
         )}
-        <div className="relative mx-auto h-64 w-64">
+        <div className="item-center flex justify-center">
           {participants.length > 1 && (
             <Wheel
               mustStartSpinning={isSpinning}
-              prizeNumber={0}
+              prizeNumber={prizeNumber}
               data={wheelData}
-              onStopSpinning={() => {
-                setIsSpinning(false);
-              }}
+              onStopSpinning={selectWinner}
               backgroundColors={[
                 "#FF6B6B",
                 "#4ECDC4",
@@ -111,7 +119,7 @@ export const Roulette = () => {
                 "#F06292",
               ]}
               textColors={["#ffffff"]}
-              fontSize={14}
+              spinDuration={0.2}
             />
           )}
         </div>
@@ -128,7 +136,7 @@ export const Roulette = () => {
           </Button>
         </div>
         {winner && (
-          <div className="bg-primary text-primary-foreground rounded-lg p-4 text-center">
+          <div className={`${winnerStyle} rounded-lg p-4 text-center`}>
             <span className="text-xl font-bold">
               Winner of the Roulette: {winner.name} {winner.emoji}
             </span>

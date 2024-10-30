@@ -1,24 +1,41 @@
-"use client";
-
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import JSConfetti from "js-confetti";
 
 export interface Participant {
   name: string;
   emoji: string;
+  isHit: boolean;
 }
 
 export function useRoulettePresenter() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [newParticipantName, setNewParticipantName] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [selectedParticipant, setSelectedParticipant] =
+    useState<Participant | null>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [winner, setWinner] = useState<Participant | null>(null);
+  const [prizeNumber, setPrizeNumber] = useState(0);
   const jsConfettiRef = useRef<JSConfetti | null>(null);
 
   useEffect(() => {
     jsConfettiRef.current = new JSConfetti();
   }, []);
+
+  const updateNewParticipantName = useCallback((name: string) => {
+    setNewParticipantName(name);
+  }, []);
+
+  const toggleEmojiPicker = useCallback((show: boolean) => {
+    setShowEmojiPicker(show);
+  }, []);
+
+  const selectParticipantForEmoji = useCallback(
+    (participant: Participant | null) => {
+      setSelectedParticipant(participant);
+    },
+    [],
+  );
 
   const addParticipant = useCallback(() => {
     if (
@@ -27,7 +44,7 @@ export function useRoulettePresenter() {
     ) {
       setParticipants((prev) => [
         ...prev,
-        { name: newParticipantName, emoji: "😊" },
+        { name: newParticipantName, emoji: "😊", isHit: false },
       ]);
       setNewParticipantName("");
     }
@@ -37,46 +54,68 @@ export function useRoulettePresenter() {
     setParticipants((prev) => prev.filter((p) => p.name !== participant.name));
   }, []);
 
-  const celebrateWinner = useCallback(async (emoji: string) => {
-    if (jsConfettiRef.current) {
-      await jsConfettiRef.current.addConfetti({
-        emojis: [emoji],
-        emojiSize: 50,
-        confettiNumber: 30,
-      });
-      await jsConfettiRef.current.addConfetti({
-        emojis: ["🎉", "🎊", "✨", "⭐", "🌟"],
-        emojiSize: 30,
-        confettiNumber: 50,
-      });
-    }
-  }, []);
+  const handleEmojiClick = useCallback(
+    (emojiObject: { emoji: string }) => {
+      if (selectedParticipant) {
+        setParticipants((prev) =>
+          prev.map((p) =>
+            p.name === selectedParticipant.name
+              ? { ...p, emoji: emojiObject.emoji }
+              : p,
+          ),
+        );
+        setShowEmojiPicker(false);
+        setSelectedParticipant(null);
+      }
+    },
+    [selectedParticipant],
+  );
 
   const spinRoulette = useCallback(() => {
-    if (participants.length > 1 && !isSpinning) {
+    const availableParticipants = participants.filter((p) => !p.isHit);
+    if (availableParticipants.length > 1 && !isSpinning) {
+      const randomParticipant =
+        availableParticipants[
+          Math.floor(Math.random() * availableParticipants.length)
+        ];
+      const globalIndex = participants.findIndex(
+        (p) => p.name === randomParticipant?.name,
+      );
+      setPrizeNumber(globalIndex);
       setIsSpinning(true);
       setWinner(null);
-      setTimeout(() => {
-        const winnerIndex = Math.floor(Math.random() * participants.length);
-        const selectedWinner = participants[winnerIndex];
-        setIsSpinning(false);
-        if (selectedWinner) {
-          setWinner(selectedWinner);
-          void celebrateWinner(selectedWinner.emoji);
-        }
-        setParticipants((prev) =>
-          prev.filter((_, index) => index !== winnerIndex),
-        );
-      }, 5000);
     }
-  }, [participants, isSpinning, celebrateWinner]);
+  }, [participants, isSpinning]);
+
+  const selectWinner = useCallback(() => {
+    setParticipants((prev) =>
+      prev.map((p, index) =>
+        index === prizeNumber ? { ...p, isHit: true } : p,
+      ),
+    );
+    const selectedWinner = participants[prizeNumber];
+    if (selectedWinner) {
+      setWinner(selectedWinner);
+      void jsConfettiRef.current?.addConfetti({
+        emojis: Array(100).fill(selectedWinner.emoji),
+        emojiSize: 40,
+        confettiNumber: 500,
+      });
+    }
+    setIsSpinning(false);
+  }, [participants, prizeNumber]);
 
   const resetSelection = useCallback(() => {
+    setParticipants((prev) => prev.map((p) => ({ ...p, isHit: false })));
     setWinner(null);
   }, []);
 
   const wheelData = useMemo(
-    () => participants.map((p) => ({ option: `${p.name} ${p.emoji}` })),
+    () =>
+      participants.map((p) => ({
+        option: `${p.name} ${p.emoji}`,
+        style: p.isHit ? { backgroundColor: "gray", textColor: "white" } : {},
+      })),
     [participants],
   );
 
@@ -84,15 +123,19 @@ export function useRoulettePresenter() {
     participants,
     newParticipantName,
     showEmojiPicker,
+    selectedParticipant,
     isSpinning,
     winner,
-    setNewParticipantName,
-    setShowEmojiPicker,
+    prizeNumber,
+    updateNewParticipantName,
+    toggleEmojiPicker,
+    selectParticipantForEmoji,
     addParticipant,
     removeParticipant,
+    handleEmojiClick,
     spinRoulette,
     resetSelection,
+    selectWinner,
     wheelData,
-    setIsSpinning,
   };
 }
