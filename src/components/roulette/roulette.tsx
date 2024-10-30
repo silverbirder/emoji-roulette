@@ -147,7 +147,6 @@ export const Roulette = ({ roulette }: Props) => {
                   <Pencil className="h-4 w-4" />
                 </Button>
                 <Switch
-                  id={`hit-toggle-${participant.uuid}`}
                   checked={participant.isHit}
                   onCheckedChange={() => toggleParticipantHit(participant.uuid)}
                 />
