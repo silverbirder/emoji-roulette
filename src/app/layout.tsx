@@ -5,6 +5,7 @@ import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "@/trpc/react";
 import { Toaster } from "@/components/ui/toaster";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata: Metadata = {
   title: "Emoji Roulette",
@@ -22,6 +23,7 @@ export default function RootLayout({
           {children}
           <Toaster />
         </TRPCReactProvider>
+        {process.env.GA_ID && <GoogleAnalytics gaId={process.env.GA_ID} />}
       </body>
     </html>
   );
