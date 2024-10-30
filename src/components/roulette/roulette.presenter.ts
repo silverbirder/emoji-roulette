@@ -38,7 +38,18 @@ export function useRoulettePresenter({ roulette }: Props) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [winner, setWinner] = useState<Participant | null>(null);
   const [prizeNumber, setPrizeNumber] = useState(0);
+  const [editingParticipant, setEditingParticipant] = useState<string | null>(
+    null,
+  );
+  const [editName, setEditName] = useState("");
+  const [emojiPickerPosition, setEmojiPickerPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+
   const jsConfettiRef = useRef<JSConfetti | null>(null);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
+
   const { toast } = useToast();
   const router = useRouter();
 
@@ -122,6 +133,33 @@ export function useRoulettePresenter({ roulette }: Props) {
     [participants],
   );
 
+  const handleEditClick = useCallback((participantName: string) => {
+    setEditingParticipant(participantName);
+    setEditName(participantName);
+  }, []);
+
+  const handleEditSubmit = useCallback(
+    (oldName: string) => {
+      editParticipantName(oldName, editName);
+      setEditingParticipant(null);
+      setEditName("");
+    },
+    [editParticipantName, editName],
+  );
+
+  const handleEmojiButtonClick = useCallback(
+    (participant: Participant, event: React.MouseEvent<HTMLButtonElement>) => {
+      const buttonRect = event.currentTarget.getBoundingClientRect();
+      setEmojiPickerPosition({
+        top: buttonRect.top + window.scrollY + buttonRect.height,
+        left: buttonRect.left + window.scrollX,
+      });
+      toggleEmojiPicker(true);
+      selectParticipantForEmoji(participant);
+    },
+    [toggleEmojiPicker, selectParticipantForEmoji],
+  );
+
   const spinRoulette = useCallback(() => {
     const availableParticipants = participants.filter((p) => !p.isHit);
     if (availableParticipants.length > 0 && !isSpinning) {
@@ -187,6 +225,27 @@ export function useRoulettePresenter({ roulette }: Props) {
     [participants],
   );
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(event.target as Node)
+      ) {
+        toggleEmojiPicker(false);
+      }
+    };
+
+    if (showEmojiPicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showEmojiPicker, toggleEmojiPicker]);
+
   return {
     participants,
     newParticipantName,
@@ -195,14 +254,18 @@ export function useRoulettePresenter({ roulette }: Props) {
     isSpinning,
     winner,
     prizeNumber,
+    editingParticipant,
+    editName,
+    emojiPickerPosition,
+    emojiPickerRef,
     updateNewParticipantName,
-    toggleEmojiPicker,
-    selectParticipantForEmoji,
     addParticipant,
     removeParticipant,
     handleEmojiClick,
     toggleParticipantHit,
-    editParticipantName,
+    handleEditClick,
+    handleEditSubmit,
+    handleEmojiButtonClick,
     spinRoulette,
     resetSelection,
     selectWinner,
