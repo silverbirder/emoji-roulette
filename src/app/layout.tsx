@@ -6,6 +6,7 @@ import { type Metadata } from "next";
 import { TRPCReactProvider } from "@/trpc/react";
 import { Toaster } from "@/components/ui/toaster";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { Footer } from "@/components/footer";
 
 export const metadata: Metadata = {
   title: "Emoji Roulette",
@@ -18,11 +19,12 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
-      <body>
-        <TRPCReactProvider>
-          {children}
-          <Toaster />
-        </TRPCReactProvider>
+      <body className="flex flex-col">
+        <main>
+          <TRPCReactProvider>{children}</TRPCReactProvider>
+        </main>
+        <Footer />
+        <Toaster />
         {process.env.GA_ID && <GoogleAnalytics gaId={process.env.GA_ID} />}
       </body>
     </html>
