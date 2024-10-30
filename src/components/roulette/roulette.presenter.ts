@@ -148,9 +148,10 @@ export function useRoulettePresenter({ roulette }: Props) {
 
   const saveState = useCallback(() => {
     saveRoulette.mutate({
+      id: roulette?.id,
       participants,
     });
-  }, [participants, saveRoulette]);
+  }, [participants, saveRoulette, roulette?.id]);
 
   const wheelData = useMemo(
     () =>
