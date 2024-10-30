@@ -63,7 +63,7 @@ export const Roulette = ({ roulette }: Props) => {
   } = useRoulettePresenter({ roulette });
 
   return (
-    <Card className="space-y-4 mx-auto w-full max-w-2xl">
+    <Card className="mx-auto w-full max-w-2xl space-y-8">
       <CardHeader className="bg-background/80 sticky top-0 z-10 flex flex-row items-center justify-between backdrop-blur-sm">
         <CardTitle className="text-2xl font-bold">Emoji Roulette</CardTitle>
         <div className="flex space-x-2">
@@ -193,7 +193,7 @@ export const Roulette = ({ roulette }: Props) => {
             </div>
           )}
           <div className="item-center flex justify-center">
-            {participants.length > 1 && (
+            {participants.length > 1 ? (
               <Wheel
                 mustStartSpinning={isSpinning}
                 prizeNumber={prizeNumber}
@@ -210,6 +210,12 @@ export const Roulette = ({ roulette }: Props) => {
                 textColors={["#ffffff"]}
                 spinDuration={0.2}
               />
+            ) : (
+              <div className="flex h-64 w-64 items-center justify-center rounded-full border-4 border-gray-300">
+                <p className="text-center text-gray-500">
+                  Add participants to start the roulette
+                </p>
+              </div>
             )}
           </div>
         </div>
