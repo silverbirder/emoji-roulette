@@ -9,9 +9,13 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import { Footer } from "@/components/footer";
 
 export const metadata: Metadata = {
+  robots: {
+    index: true,
+  },
   title: "Emoji Roulette",
   description: "Spin the wheel of emojis!",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
+  keywords: ["Emoji", "Roulette"],
 };
 
 export default function RootLayout({
