@@ -4,6 +4,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import dynamic from "next/dynamic";
 import { useRoulettePresenter } from "./roulette.presenter";
 
@@ -50,6 +51,7 @@ export const Roulette = ({ roulette }: Props) => {
     addParticipant,
     removeParticipant,
     handleEmojiClick,
+    toggleParticipantHit,
     spinRoulette,
     resetSelection,
     selectWinner,
@@ -87,7 +89,7 @@ export const Roulette = ({ roulette }: Props) => {
               <span>
                 {participant.participantName} {participant.emoji}
               </span>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -105,6 +107,19 @@ export const Roulette = ({ roulette }: Props) => {
                 >
                   Remove
                 </Button>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id={`hit-toggle-${index}`}
+                    checked={participant.isHit}
+                    onCheckedChange={() => toggleParticipantHit(participant)}
+                  />
+                  <label
+                    htmlFor={`hit-toggle-${index}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Hit
+                  </label>
+                </div>
               </div>
             </div>
           ))}

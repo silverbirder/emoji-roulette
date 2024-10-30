@@ -97,6 +97,16 @@ export function useRoulettePresenter({ roulette }: Props) {
     [selectedParticipant],
   );
 
+  const toggleParticipantHit = useCallback((participant: Participant) => {
+    setParticipants((prev) =>
+      prev.map((p) =>
+        p.participantName === participant.participantName
+          ? { ...p, isHit: !p.isHit }
+          : p,
+      ),
+    );
+  }, []);
+
   const spinRoulette = useCallback(() => {
     const availableParticipants = participants.filter((p) => !p.isHit);
     if (availableParticipants.length > 1 && !isSpinning) {
@@ -176,6 +186,7 @@ export function useRoulettePresenter({ roulette }: Props) {
     addParticipant,
     removeParticipant,
     handleEmojiClick,
+    toggleParticipantHit,
     spinRoulette,
     resetSelection,
     selectWinner,
