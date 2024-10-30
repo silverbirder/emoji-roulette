@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { randomBytes } from "crypto";
-
+import { eq } from "drizzle-orm/expressions";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { roulettes, rouletteParticipants } from "@/server/db/schema";
 
@@ -44,10 +44,40 @@ export const rouletteRouter = createTRPCRouter({
   getRouletteByHash: publicProcedure
     .input(z.object({ hash: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
-      const roulette = await ctx.db.query.roulettes.findFirst({
-        where: (roulettes, { eq }) => eq(roulettes.hash, input.hash),
-      });
+      const result = await ctx.db
+        .select({
+          roulette: roulettes,
+          participant: rouletteParticipants,
+        })
+        .from(roulettes)
+        .leftJoin(
+          rouletteParticipants,
+          eq(roulettes.id, rouletteParticipants.rouletteId),
+        )
+        .where(eq(roulettes.hash, input.hash));
 
-      return roulette ?? null;
+      const rouletteData = result.reduce<{
+        roulette: typeof roulettes.$inferSelect | null;
+        participants: (typeof rouletteParticipants.$inferSelect)[];
+      }>(
+        (acc, row) => {
+          const { roulette, participant } = row;
+          if (!acc.roulette) {
+            acc.roulette = roulette;
+          }
+          if (participant) {
+            acc.participants.push(participant);
+          }
+          return acc;
+        },
+        { roulette: null, participants: [] },
+      );
+
+      return rouletteData.roulette
+        ? {
+            ...rouletteData.roulette,
+            participants: rouletteData.participants,
+          }
+        : null;
     }),
 });

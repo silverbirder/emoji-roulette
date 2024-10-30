@@ -1,14 +1,36 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import JSConfetti from "js-confetti";
+import { useToast } from "@/hooks/use-toast";
+import { api } from "@/trpc/react";
+import { useRouter } from "next/navigation";
 
 export interface Participant {
-  name: string;
+  participantName: string;
   emoji: string;
   isHit: boolean;
 }
 
-export function useRoulettePresenter() {
-  const [participants, setParticipants] = useState<Participant[]>([]);
+type Props = {
+  roulette?: {
+    id: number;
+    hash: string;
+    participants: {
+      id: number;
+      participantName: string;
+      emoji: string;
+      isHit: boolean | null;
+      rouletteId: number;
+    }[];
+  } | null;
+};
+
+export function useRoulettePresenter({ roulette }: Props) {
+  const [participants, setParticipants] = useState<Participant[]>(
+    roulette?.participants.map((participant) => ({
+      ...participant,
+      isHit: !!participant.isHit,
+    })) ?? [],
+  );
   const [newParticipantName, setNewParticipantName] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [selectedParticipant, setSelectedParticipant] =
@@ -17,6 +39,8 @@ export function useRoulettePresenter() {
   const [winner, setWinner] = useState<Participant | null>(null);
   const [prizeNumber, setPrizeNumber] = useState(0);
   const jsConfettiRef = useRef<JSConfetti | null>(null);
+  const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     jsConfettiRef.current = new JSConfetti();
@@ -40,18 +64,20 @@ export function useRoulettePresenter() {
   const addParticipant = useCallback(() => {
     if (
       newParticipantName &&
-      !participants.some((p) => p.name === newParticipantName)
+      !participants.some((p) => p.participantName === newParticipantName)
     ) {
       setParticipants((prev) => [
         ...prev,
-        { name: newParticipantName, emoji: "😊", isHit: false },
+        { participantName: newParticipantName, emoji: "😊", isHit: false },
       ]);
       setNewParticipantName("");
     }
   }, [newParticipantName, participants]);
 
   const removeParticipant = useCallback((participant: Participant) => {
-    setParticipants((prev) => prev.filter((p) => p.name !== participant.name));
+    setParticipants((prev) =>
+      prev.filter((p) => p.participantName !== participant.participantName),
+    );
   }, []);
 
   const handleEmojiClick = useCallback(
@@ -59,7 +85,7 @@ export function useRoulettePresenter() {
       if (selectedParticipant) {
         setParticipants((prev) =>
           prev.map((p) =>
-            p.name === selectedParticipant.name
+            p.participantName === selectedParticipant.participantName
               ? { ...p, emoji: emojiObject.emoji }
               : p,
           ),
@@ -79,7 +105,7 @@ export function useRoulettePresenter() {
           Math.floor(Math.random() * availableParticipants.length)
         ];
       const globalIndex = participants.findIndex(
-        (p) => p.name === randomParticipant?.name,
+        (p) => p.participantName === randomParticipant?.participantName,
       );
       setPrizeNumber(globalIndex);
       setIsSpinning(true);
@@ -110,10 +136,26 @@ export function useRoulettePresenter() {
     setWinner(null);
   }, []);
 
+  const saveRoulette = api.roulette.saveRoulette.useMutation({
+    onSuccess: ({ hash }) => {
+      toast({
+        title: "State Saved",
+        description: "The current roulette state has been saved.",
+      });
+      router.push(`/roulettes/${hash}`);
+    },
+  });
+
+  const saveState = useCallback(() => {
+    saveRoulette.mutate({
+      participants,
+    });
+  }, [participants, saveRoulette]);
+
   const wheelData = useMemo(
     () =>
       participants.map((p) => ({
-        option: `${p.name} ${p.emoji}`,
+        option: `${p.participantName} ${p.emoji}`,
         style: p.isHit ? { backgroundColor: "gray", textColor: "white" } : {},
       })),
     [participants],
@@ -137,5 +179,6 @@ export function useRoulettePresenter() {
     resetSelection,
     selectWinner,
     wheelData,
+    saveState,
   };
 }

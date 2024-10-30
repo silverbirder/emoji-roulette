@@ -21,7 +21,21 @@ const Wheel = dynamic(
   },
 );
 
-export const Roulette = () => {
+type Props = {
+  roulette?: {
+    id: number;
+    hash: string;
+    participants: {
+      id: number;
+      participantName: string;
+      emoji: string;
+      isHit: boolean | null;
+      rouletteId: number;
+    }[];
+  } | null;
+};
+
+export const Roulette = ({ roulette }: Props) => {
   const {
     participants,
     newParticipantName,
@@ -40,9 +54,10 @@ export const Roulette = () => {
     resetSelection,
     selectWinner,
     wheelData,
-  } = useRoulettePresenter();
+    saveState,
+  } = useRoulettePresenter({ roulette });
 
-  const winnerStyle = "bg-yellow-400 text-yellow-900 font-semibold"; // Define winner style class
+  const winnerStyle = "bg-yellow-400 text-yellow-900 font-semibold";
 
   return (
     <Card className="mx-auto w-full max-w-2xl">
@@ -66,13 +81,11 @@ export const Roulette = () => {
             <div
               key={index}
               className={`flex items-center justify-between rounded p-2 ${
-                participant.isHit
-                  ? "bg-gray-300 text-gray-600" // Style for hit participants
-                  : "bg-muted"
+                participant.isHit ? "bg-gray-300 text-gray-600" : "bg-muted"
               }`}
             >
               <span>
-                {participant.name} {participant.emoji}
+                {participant.participantName} {participant.emoji}
               </span>
               <div className="flex gap-2">
                 <Button
@@ -134,11 +147,14 @@ export const Roulette = () => {
           <Button onClick={resetSelection} variant="outline" className="w-full">
             Reset Selection
           </Button>
+          <Button onClick={saveState} variant="secondary" className="w-full">
+            Save State
+          </Button>
         </div>
         {winner && (
           <div className={`${winnerStyle} rounded-lg p-4 text-center`}>
             <span className="text-xl font-bold">
-              Winner of the Roulette: {winner.name} {winner.emoji}
+              Winner of the Roulette: {winner.participantName} {winner.emoji}
             </span>
           </div>
         )}

@@ -48,6 +48,6 @@ const config = {
       },
     ],
   },
-  ignorePatterns: ["src/components/ui"],
+  ignorePatterns: ["src/components/ui", "src/hooks/use-toast.ts"],
 };
 module.exports = config;
