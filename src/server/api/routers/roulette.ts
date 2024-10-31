@@ -8,7 +8,7 @@ export const rouletteRouter = createTRPCRouter({
   saveRoulette: publicProcedure
     .input(
       z.object({
-        id: z.number().optional(),
+        hash: z.string().optional(),
         participants: z.array(
           z.object({
             id: z.number().optional(),
@@ -20,24 +20,24 @@ export const rouletteRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, participants } = input;
+      const { hash: _hash, participants } = input;
 
       let rouletteId;
       let hash;
 
-      if (id) {
+      if (_hash) {
         const roulette = await ctx.db
-          .select({ hash: roulettes.hash })
+          .select({ id: roulettes.id })
           .from(roulettes)
-          .where(eq(roulettes.id, id))
+          .where(eq(roulettes.hash, _hash))
           .execute();
 
         if (roulette.length === 0) {
           throw new Error("ルーレットが見つかりませんでした");
         }
 
-        hash = roulette[0]?.hash ?? "";
-        rouletteId = id;
+        hash = _hash;
+        rouletteId = roulette[0]?.id ?? 0;
       } else {
         hash = randomBytes(16).toString("hex");
         const [newRoulette] = await ctx.db

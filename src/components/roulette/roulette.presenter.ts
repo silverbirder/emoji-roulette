@@ -217,10 +217,10 @@ export function useRoulettePresenter({ roulette }: Props) {
 
   const saveState = useCallback(() => {
     saveRoulette.mutate({
-      id: roulette?.id,
+      hash: roulette?.hash,
       participants,
     });
-  }, [participants, saveRoulette, roulette?.id]);
+  }, [participants, saveRoulette, roulette?.hash]);
 
   const closeSuccessAlert = useCallback(() => {
     setShowSuccessAlert(false);
