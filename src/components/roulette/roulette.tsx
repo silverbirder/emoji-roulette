@@ -10,7 +10,7 @@ import { useRoulettePresenter } from "./roulette.presenter";
 import {
   Pencil,
   Trash2,
-  ToggleLeft,
+  ToggleRight,
   Save,
   Trophy,
   Zap,
@@ -78,7 +78,7 @@ export const Roulette = ({ roulette }: Props) => {
 
   return (
     <Card className="mx-auto w-full max-w-2xl space-y-8">
-      <CardHeader className="bg-background/80 sticky top-0 z-10 flex flex-row items-center justify-between backdrop-blur-sm">
+      <CardHeader className="sticky top-0 z-10 flex flex-row items-center justify-between bg-background/80 backdrop-blur-sm">
         <CardTitle className="text-2xl font-bold">Emoji Roulette</CardTitle>
         <div className="flex space-x-2">
           <Button
@@ -88,7 +88,7 @@ export const Roulette = ({ roulette }: Props) => {
             title="Reset Selection"
             className="text-yellow-600 hover:text-yellow-700"
           >
-            <ToggleLeft className="h-4 w-4" />
+            <ToggleRight className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
@@ -191,7 +191,7 @@ export const Roulette = ({ roulette }: Props) => {
                   <Pencil className="h-4 w-4" />
                 </Button>
                 <Switch
-                  checked={participant.isHit}
+                  checked={!participant.isHit}
                   onCheckedChange={() => toggleParticipantHit(participant.uuid)}
                 />
                 <Button
