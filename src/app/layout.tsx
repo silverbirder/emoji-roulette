@@ -4,7 +4,6 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "@/trpc/react";
-import { Toaster } from "@/components/ui/toaster";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { Footer } from "@/components/footer";
 
@@ -25,7 +24,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
+    <html lang="en" className={`${GeistSans.variable} h-full`}>
       <head>
         <link
           rel="apple-touch-icon"
@@ -34,12 +33,11 @@ export default function RootLayout({
         ></link>
         <link rel="icon" type="image/png" href="/icon-192x192.png"></link>
       </head>
-      <body className="flex flex-col">
-        <main>
+      <body className="flex min-h-screen flex-col items-center justify-center">
+        <main className="flex w-full max-w-2xl flex-grow items-center justify-center px-4">
           <TRPCReactProvider>{children}</TRPCReactProvider>
         </main>
         <Footer />
-        <Toaster />
         {process.env.GA_ID && <GoogleAnalytics gaId={process.env.GA_ID} />}
       </body>
     </html>

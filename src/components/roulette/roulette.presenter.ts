@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import JSConfetti from "js-confetti";
 import { v4 as uuidv4 } from "uuid";
-import { useToast } from "@/hooks/use-toast";
 import { api } from "@/trpc/react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -56,7 +55,6 @@ export function useRoulettePresenter({ roulette }: Props) {
   const jsConfettiRef = useRef<JSConfetti | null>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
 
-  const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -207,10 +205,6 @@ export function useRoulettePresenter({ roulette }: Props) {
   const saveRoulette = api.roulette.saveRoulette.useMutation({
     onSuccess: ({ hash }) => {
       const newUrl = `/roulettes/${hash}?showAlert=true`;
-      toast({
-        title: "State Saved",
-        description: "The current roulette state has been saved.",
-      });
       router.push(newUrl);
     },
   });
