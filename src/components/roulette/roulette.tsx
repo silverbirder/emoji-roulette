@@ -126,101 +126,7 @@ export const Roulette = ({ roulette }: Props) => {
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex space-x-2">
-            <Input
-              type="text"
-              placeholder="Participant Name"
-              value={newParticipantName}
-              onChange={(e) => updateNewParticipantName(e.target.value)}
-            />
-            <Button onClick={addParticipant}>Add</Button>
-          </div>
-          <div className="space-y-2">
-            {participants.map((participant) => (
-              <div
-                key={participant.uuid}
-                className={`flex items-center justify-between rounded p-2 ${
-                  participant.isHit ? "bg-gray-300 text-gray-600" : "bg-muted"
-                }`}
-              >
-                {editingParticipant === participant.uuid ? (
-                  <div className="flex flex-grow items-center space-x-2">
-                    <Input
-                      type="text"
-                      value={editName}
-                      onChange={(e) => handleChangeEditName(e.target.value)}
-                      className="flex-grow"
-                      placeholder="Name"
-                    />
-                    <Button
-                      onClick={() => handleEditSubmit(participant.uuid)}
-                      size="sm"
-                    >
-                      Save
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex flex-grow items-center space-x-2">
-                    <button
-                      className="text-2xl"
-                      onClick={(e) => handleEmojiButtonClick(participant, e)}
-                    >
-                      {participant.emoji}
-                    </button>
-                    <span>{participant.participantName}</span>
-                  </div>
-                )}
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() =>
-                      handleEditClick(
-                        participant.uuid,
-                        participant.participantName,
-                      )
-                    }
-                    aria-label={`Edit ${participant.participantName}`}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Switch
-                    checked={!participant.isHit}
-                    onCheckedChange={() =>
-                      toggleParticipantHit(participant.uuid)
-                    }
-                  />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeParticipant(participant.uuid)}
-                    aria-label={`Remove ${participant.participantName}`}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-          {showEmojiPicker && selectedParticipant && emojiPickerPosition && (
-            <div
-              ref={emojiPickerRef}
-              className="absolute z-20 w-80 md:w-96"
-              style={{
-                top: emojiPickerPosition?.top,
-                left: emojiPickerPosition?.left,
-              }}
-            >
-              <EmojiPicker
-                onEmojiClick={(emojiObject) => handleEmojiClick(emojiObject)}
-                autoFocusSearch={false}
-                lazyLoadEmojis={true}
-                width="100%"
-                className="relative"
-              />
-            </div>
-          )}
+        <CardContent className="space-y-8">
           <div className="relative">
             {winner && (
               <div className="absolute inset-0 z-10 flex items-center justify-center">
@@ -235,7 +141,13 @@ export const Roulette = ({ roulette }: Props) => {
                 </div>
               </div>
             )}
-            <div className="item-center flex justify-center">
+            <div
+              className="item-center flex justify-center"
+              style={{
+                height: "80vw",
+                maxHeight: "445px",
+              }}
+            >
               {participants.length > 1 ? (
                 <Wheel
                   mustStartSpinning={isSpinning}
@@ -280,6 +192,102 @@ export const Roulette = ({ roulette }: Props) => {
                 </>
               )}
             </Button>
+          </div>
+          <div className="flex flex-col space-y-4">
+            <div className="flex space-x-2">
+              <Input
+                type="text"
+                placeholder="Participant Name"
+                value={newParticipantName}
+                onChange={(e) => updateNewParticipantName(e.target.value)}
+              />
+              <Button onClick={addParticipant}>Add</Button>
+            </div>
+            <div className="space-y-2">
+              {participants.map((participant) => (
+                <div
+                  key={participant.uuid}
+                  className={`flex items-center justify-between rounded p-2 ${
+                    participant.isHit ? "bg-gray-300 text-gray-600" : "bg-muted"
+                  }`}
+                >
+                  {editingParticipant === participant.uuid ? (
+                    <div className="flex flex-grow items-center space-x-2">
+                      <Input
+                        type="text"
+                        value={editName}
+                        onChange={(e) => handleChangeEditName(e.target.value)}
+                        className="flex-grow"
+                        placeholder="Name"
+                      />
+                      <Button
+                        onClick={() => handleEditSubmit(participant.uuid)}
+                        size="sm"
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-grow items-center space-x-2">
+                      <button
+                        className="text-2xl"
+                        onClick={(e) => handleEmojiButtonClick(participant, e)}
+                      >
+                        {participant.emoji}
+                      </button>
+                      <span>{participant.participantName}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        handleEditClick(
+                          participant.uuid,
+                          participant.participantName,
+                        )
+                      }
+                      aria-label={`Edit ${participant.participantName}`}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Switch
+                      checked={!participant.isHit}
+                      onCheckedChange={() =>
+                        toggleParticipantHit(participant.uuid)
+                      }
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeParticipant(participant.uuid)}
+                      aria-label={`Remove ${participant.participantName}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {showEmojiPicker && selectedParticipant && emojiPickerPosition && (
+              <div
+                ref={emojiPickerRef}
+                className="absolute z-20 w-80 md:w-96"
+                style={{
+                  top: emojiPickerPosition?.top,
+                  left: emojiPickerPosition?.left,
+                }}
+              >
+                <EmojiPicker
+                  onEmojiClick={(emojiObject) => handleEmojiClick(emojiObject)}
+                  autoFocusSearch={false}
+                  lazyLoadEmojis={true}
+                  width="100%"
+                  className="relative"
+                />
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
