@@ -103,7 +103,7 @@ export const Roulette = ({ roulette }: Props) => {
         </Alert>
       )}
       <Card className="space-y-8">
-        <CardHeader className="sticky top-0 z-10 flex flex-row items-center justify-between rounded-lg bg-background/80 backdrop-blur-sm">
+        <CardHeader className="sticky top-0 z-20 flex flex-row items-center justify-between rounded-lg bg-background/80 backdrop-blur-sm">
           <CardTitle className="text-2xl font-bold">Emoji Roulette</CardTitle>
           <div className="flex space-x-2">
             <Button
@@ -273,7 +273,7 @@ export const Roulette = ({ roulette }: Props) => {
             {showEmojiPicker && selectedParticipant && emojiPickerPosition && (
               <div
                 ref={emojiPickerRef}
-                className="absolute z-20 w-80 md:w-96"
+                className="absolute z-10 w-80 md:w-96"
                 style={{
                   top: emojiPickerPosition?.top,
                   left: emojiPickerPosition?.left,
