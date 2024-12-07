@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
+import "./roulette.css";
 
 const EmojiPicker = dynamic(
   () => import("emoji-picker-react").then((mod) => mod.default),
@@ -76,7 +77,9 @@ export const Roulette = ({ roulette }: Props) => {
   } = useRoulettePresenter({ roulette });
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 py-6">
+    <div
+      className={`mx-auto flex w-full max-w-2xl flex-col gap-6 py-6`}
+    >
       {showSuccessAlert && (
         <Alert className="relative bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-lg">
           <div className="pr-8">
@@ -130,7 +133,7 @@ export const Roulette = ({ roulette }: Props) => {
           <div className="relative">
             {winner && (
               <div className="absolute inset-0 z-10 flex items-center justify-center">
-                <div className="animate-fade-in rounded-lg bg-gradient-to-r from-yellow-400/90 to-orange-500/90 p-6 text-center shadow-lg backdrop-blur-sm">
+                <div className="winner-card animate-fade-in rounded-lg bg-gradient-to-r from-yellow-400/90 to-orange-500/90 p-6 text-center shadow-lg backdrop-blur-sm">
                   <Trophy className="mx-auto mb-2 h-12 w-12 text-white" />
                   <h2 className="mb-2 text-2xl font-bold text-white">
                     Winner!
