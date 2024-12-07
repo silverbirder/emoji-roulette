@@ -138,6 +138,15 @@ export const Roulette = ({ roulette }: Props) => {
                   <div className="text-3xl font-extrabold text-white">
                     {winner.emoji} {winner.participantName} {winner.emoji}
                   </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={saveState}
+                    className="mt-4 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                  >
+                    <Save className="mr-2 h-4 w-4" />
+                    Save
+                  </Button>
                 </div>
               </div>
             )}
