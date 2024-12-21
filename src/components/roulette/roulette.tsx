@@ -16,6 +16,7 @@ import {
   Zap,
   CheckCircle2,
   X,
+  RotateCcw,
 } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
 import "./roulette.css";
@@ -74,12 +75,11 @@ export const Roulette = ({ roulette }: Props) => {
     showSuccessAlert,
     savedUrl,
     closeSuccessAlert,
+    retryWinner,
   } = useRoulettePresenter({ roulette });
 
   return (
-    <div
-      className={`mx-auto flex w-full max-w-2xl flex-col gap-6 py-6`}
-    >
+    <div className={`mx-auto flex w-full max-w-2xl flex-col gap-6 py-6`}>
       {showSuccessAlert && (
         <Alert className="relative bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-lg">
           <div className="pr-8">
@@ -141,15 +141,26 @@ export const Roulette = ({ roulette }: Props) => {
                   <div className="text-3xl font-extrabold text-white">
                     {winner.emoji} {winner.participantName} {winner.emoji}
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={saveState}
-                    className="mt-4 bg-white/10 text-white hover:bg-white/20 hover:text-white"
-                  >
-                    <Save className="mr-2 h-4 w-4" />
-                    Save
-                  </Button>
+                  <div className="mt-4 space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => retryWinner()}
+                      className="bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                    >
+                      <RotateCcw className="mr-2 h-4 w-4" />
+                      Retry
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={saveState}
+                      className="bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                    >
+                      <Save className="mr-2 h-4 w-4" />
+                      Save
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}

@@ -260,6 +260,15 @@ export function useRoulettePresenter({ roulette }: Props) {
     };
   }, [showEmojiPicker, toggleEmojiPicker]);
 
+  const retryWinner = useCallback(() => {
+    if (winner) {
+      setParticipants((prev) =>
+        prev.map((p) => (p.uuid === winner.uuid ? { ...p, isHit: false } : p)),
+      );
+      spinRoulette();
+    }
+  }, [winner, spinRoulette]);
+
   return {
     participants,
     newParticipantName,
@@ -289,5 +298,6 @@ export function useRoulettePresenter({ roulette }: Props) {
     showSuccessAlert,
     savedUrl,
     closeSuccessAlert,
+    retryWinner,
   };
 }
