@@ -9,13 +9,22 @@ export const Footer = () => {
         <p className="text-gray-600">
           © {currentYear} silverbirder. All rights reserved.
         </p>
-        <Link
-          href="https://forms.gle/zKPoqxFs1kvGBKmb6"
-          target="_blank"
-          prefetch={false}
-        >
-          Contact Us
-        </Link>
+        <nav className="flex items-center gap-4">
+          <Link
+            href="https://forms.gle/zKPoqxFs1kvGBKmb6"
+            target="_blank"
+            prefetch={false}
+          >
+            Contact Us
+          </Link>
+          <Link
+            href="https://sites.google.com/view/silverbirders-services"
+            target="_blank"
+            prefetch={false}
+          >
+            My Services
+          </Link>
+        </nav>
       </div>
     </footer>
   );
