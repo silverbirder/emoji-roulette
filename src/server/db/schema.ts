@@ -4,6 +4,7 @@ import {
   serial,
   varchar,
   boolean,
+  integer,
 } from "drizzle-orm/pg-core";
 
 export const createTable = pgTableCreator((name) => `emoji-roulette_${name}`);
@@ -28,6 +29,7 @@ export const rouletteParticipants = createTable(
     participantName: varchar("participant_name", { length: 256 }).notNull(),
     emoji: varchar("emoji", { length: 4 }).notNull(),
     isHit: boolean("is_hit").default(false),
+    position: integer("position").default(0).notNull(),
     rouletteId: serial("roulette_id")
       .references(() => roulettes.id)
       .notNull(),

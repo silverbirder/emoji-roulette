@@ -17,6 +17,8 @@ import {
   CheckCircle2,
   X,
   RotateCcw,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
 import "./roulette.css";
@@ -41,6 +43,7 @@ type Props = {
       participantName: string;
       emoji: string;
       isHit: boolean | null;
+      position?: number | null;
       rouletteId: number;
     }[];
   } | null;
@@ -68,6 +71,7 @@ export const Roulette = ({ roulette }: Props) => {
     handleEditSubmit,
     handleEmojiButtonClick,
     handleChangeEditName,
+    moveParticipant,
     spinRoulette,
     resetSelection,
     selectWinner,
@@ -246,6 +250,26 @@ export const Roulette = ({ roulette }: Props) => {
                 >
                   {editingParticipant === participant.uuid ? (
                     <div className="flex flex-grow items-center space-x-2">
+                      <div className="flex flex-col text-muted-foreground">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => moveParticipant(participant.uuid, "up")}
+                          aria-label={`Move ${participant.participantName} up`}
+                        >
+                          <ArrowUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => moveParticipant(participant.uuid, "down")}
+                          aria-label={`Move ${participant.participantName} down`}
+                        >
+                          <ArrowDown className="h-4 w-4" />
+                        </Button>
+                      </div>
                       <Input
                         type="text"
                         value={editName}
@@ -262,6 +286,26 @@ export const Roulette = ({ roulette }: Props) => {
                     </div>
                   ) : (
                     <div className="flex flex-grow items-center space-x-2">
+                      <div className="flex flex-col text-muted-foreground">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => moveParticipant(participant.uuid, "up")}
+                          aria-label={`Move ${participant.participantName} up`}
+                        >
+                          <ArrowUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => moveParticipant(participant.uuid, "down")}
+                          aria-label={`Move ${participant.participantName} down`}
+                        >
+                          <ArrowDown className="h-4 w-4" />
+                        </Button>
+                      </div>
                       <button
                         className="text-2xl"
                         onClick={(e) => handleEmojiButtonClick(participant, e)}

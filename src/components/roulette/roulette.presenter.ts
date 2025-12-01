@@ -11,6 +11,7 @@ export interface Participant {
   participantName: string;
   emoji: string;
   isHit: boolean;
+  position?: number;
 }
 
 type Props = {
@@ -23,6 +24,7 @@ type Props = {
       participantName: string;
       emoji: string;
       isHit: boolean | null;
+      position?: number | null;
       rouletteId: number;
     }[];
   } | null;
@@ -49,6 +51,7 @@ export function useRoulettePresenter({ roulette }: Props) {
       participantName: participant.participantName,
       emoji: participant.emoji,
       isHit: !!participant.isHit,
+      position: participant.position ?? 0,
     })) ?? [];
 
   const [participants, setParticipants] = useState<Participant[]>(
@@ -116,6 +119,7 @@ export function useRoulettePresenter({ roulette }: Props) {
           participantName: newParticipantName,
           emoji: "😊",
           isHit: false,
+          position: prev.length,
         },
       ]);
       setNewParticipantName("");
@@ -235,12 +239,13 @@ export function useRoulettePresenter({ roulette }: Props) {
         const result = await saveRoulette.mutateAsync({
           hash: currentHash,
           autoSaveEnabled: autoSaveEnabledOverride ?? autoSaveEnabled,
-          participants: participants.map((participant) => ({
-            id: participant.id,
-            participantName: participant.participantName,
-            emoji: participant.emoji,
-            isHit: participant.isHit,
-          })),
+      participants: participants.map((participant, index) => ({
+        id: participant.id,
+        participantName: participant.participantName,
+        emoji: participant.emoji,
+        isHit: participant.isHit,
+        position: index,
+      })),
         });
 
         setCurrentHash(result.hash);
@@ -289,6 +294,24 @@ export function useRoulettePresenter({ roulette }: Props) {
       void saveState({ showAlert: false, reason, notify: !silent });
     },
     [autoSaveEnabled, saveState],
+  );
+
+  const moveParticipant = useCallback(
+    (uuid: string, direction: "up" | "down") => {
+      setParticipants((prev) => {
+        const index = prev.findIndex((p) => p.uuid === uuid);
+        if (index === -1) return prev;
+        const targetIndex = direction === "up" ? index - 1 : index + 1;
+        if (targetIndex < 0 || targetIndex >= prev.length) return prev;
+        const newList = [...prev];
+        const [removed] = newList.splice(index, 1);
+        if (!removed) return prev;
+        newList.splice(targetIndex, 0, removed);
+        return newList.map((p, idx) => ({ ...p, position: idx }));
+      });
+      requestAutoSave({ silent: true });
+    },
+    [requestAutoSave],
   );
 
   const spinRoulette = useCallback(() => {
@@ -405,6 +428,7 @@ export function useRoulettePresenter({ roulette }: Props) {
     handleEditClick,
     handleEditSubmit,
     handleEmojiButtonClick,
+    moveParticipant,
     spinRoulette,
     resetSelection,
     selectWinner,

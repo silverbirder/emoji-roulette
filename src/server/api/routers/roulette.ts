@@ -16,6 +16,7 @@ export const rouletteRouter = createTRPCRouter({
             participantName: z.string().min(1),
             emoji: z.string().min(1),
             isHit: z.boolean(),
+            position: z.number().int().nonnegative().optional(),
           }),
         ),
       }),
@@ -61,6 +62,7 @@ export const rouletteRouter = createTRPCRouter({
                 participantName: participant.participantName,
                 emoji: participant.emoji,
                 isHit: participant.isHit,
+                position: participant.position ?? 0,
               })
               .where(
                 and(
@@ -76,6 +78,7 @@ export const rouletteRouter = createTRPCRouter({
                 participantName: participant.participantName,
                 emoji: participant.emoji,
                 isHit: participant.isHit,
+                position: participant.position ?? 0,
                 rouletteId,
               })
               .returning();
@@ -116,7 +119,8 @@ export const rouletteRouter = createTRPCRouter({
           rouletteParticipants,
           eq(roulettes.id, rouletteParticipants.rouletteId),
         )
-        .where(eq(roulettes.hash, input.hash));
+        .where(eq(roulettes.hash, input.hash))
+        .orderBy(rouletteParticipants.position, rouletteParticipants.id);
 
       const rouletteData = result.reduce<{
         roulette: typeof roulettes.$inferSelect | null;
