@@ -3,8 +3,10 @@ import JSConfetti from "js-confetti";
 import { v4 as uuidv4 } from "uuid";
 import { api } from "@/trpc/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
 
 export interface Participant {
+  id?: number;
   uuid: string;
   participantName: string;
   emoji: string;
@@ -15,6 +17,7 @@ type Props = {
   roulette?: {
     id: number;
     hash: string;
+    autoSaveEnabled: boolean;
     participants: {
       id: number;
       participantName: string;
@@ -26,13 +29,33 @@ type Props = {
 };
 
 export function useRoulettePresenter({ roulette }: Props) {
-  const [participants, setParticipants] = useState<Participant[]>(
+  const serializeParticipants = useCallback(
+    (list: Participant[]) =>
+      JSON.stringify(
+        list.map((p) => ({
+          id: p.id,
+          participantName: p.participantName,
+          emoji: p.emoji,
+          isHit: p.isHit,
+        })),
+      ),
+    [],
+  );
+
+  const initialParticipants: Participant[] =
     roulette?.participants.map((participant) => ({
+      id: participant.id,
       uuid: uuidv4(),
       participantName: participant.participantName,
       emoji: participant.emoji,
       isHit: !!participant.isHit,
-    })) ?? [],
+    })) ?? [];
+
+  const [participants, setParticipants] = useState<Participant[]>(
+    initialParticipants,
+  );
+  const [currentHash, setCurrentHash] = useState<string | undefined>(
+    roulette?.hash,
   );
   const [newParticipantName, setNewParticipantName] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -51,6 +74,13 @@ export function useRoulettePresenter({ roulette }: Props) {
   } | null>(null);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [savedUrl, setSavedUrl] = useState("");
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(
+    roulette?.autoSaveEnabled ?? false,
+  );
+
+  const participantsSnapshotRef = useRef<string>(
+    serializeParticipants(initialParticipants),
+  );
 
   const jsConfettiRef = useRef<JSConfetti | null>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
@@ -163,22 +193,6 @@ export function useRoulettePresenter({ roulette }: Props) {
     [toggleEmojiPicker, selectParticipantForEmoji],
   );
 
-  const spinRoulette = useCallback(() => {
-    const availableParticipants = participants.filter((p) => !p.isHit);
-    if (availableParticipants.length > 0 && !isSpinning) {
-      const randomParticipant =
-        availableParticipants[
-          Math.floor(Math.random() * availableParticipants.length)
-        ];
-      const globalIndex = participants.findIndex(
-        (p) => p.uuid === randomParticipant?.uuid,
-      );
-      setPrizeNumber(globalIndex);
-      setIsSpinning(true);
-      setWinner(null);
-    }
-  }, [participants, isSpinning]);
-
   const selectWinner = useCallback(() => {
     setParticipants((prev) =>
       prev.map((p, index) =>
@@ -203,18 +217,96 @@ export function useRoulettePresenter({ roulette }: Props) {
   }, []);
 
   const saveRoulette = api.roulette.saveRoulette.useMutation({
-    onSuccess: ({ hash }) => {
-      const newUrl = `/roulettes/${hash}?showAlert=true`;
-      router.push(newUrl);
-    },
   });
 
-  const saveState = useCallback(() => {
-    saveRoulette.mutate({
-      hash: roulette?.hash,
+  const saveState = useCallback(
+    async ({
+      showAlert = true,
+      reason,
+      autoSaveEnabledOverride,
+      notify = true,
+    }: {
+      showAlert?: boolean;
+      reason?: string;
+      autoSaveEnabledOverride?: boolean;
+      notify?: boolean;
+    } = {}) => {
+      try {
+        const result = await saveRoulette.mutateAsync({
+          hash: currentHash,
+          autoSaveEnabled: autoSaveEnabledOverride ?? autoSaveEnabled,
+          participants: participants.map((participant) => ({
+            id: participant.id,
+            participantName: participant.participantName,
+            emoji: participant.emoji,
+            isHit: participant.isHit,
+          })),
+        });
+
+        setCurrentHash(result.hash);
+
+        if (showAlert) {
+          const newUrl = `/roulettes/${result.hash}?showAlert=true`;
+          router.push(newUrl);
+        } else if (!currentHash) {
+          const newUrl = `/roulettes/${result.hash}`;
+          router.replace(newUrl);
+        }
+
+        if (!showAlert && notify) {
+          toast({
+            title: "Auto-saved",
+            description: reason ?? "Latest changes saved.",
+          });
+        }
+
+        participantsSnapshotRef.current = serializeParticipants(participants);
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "An error occurred while saving.";
+        toast({
+          title: "Save failed",
+          description: message,
+          variant: "destructive",
+        });
+      }
+    },
+    [
+      autoSaveEnabled,
+      currentHash,
       participants,
-    });
-  }, [participants, saveRoulette, roulette?.hash]);
+      router,
+      saveRoulette,
+      serializeParticipants,
+    ],
+  );
+
+  const requestAutoSave = useCallback(
+    ({ reason, silent }: { reason?: string; silent?: boolean } = {}) => {
+      if (!autoSaveEnabled) return;
+      void saveState({ showAlert: false, reason, notify: !silent });
+    },
+    [autoSaveEnabled, saveState],
+  );
+
+  const spinRoulette = useCallback(() => {
+    const availableParticipants = participants.filter((p) => !p.isHit);
+    if (availableParticipants.length > 0 && !isSpinning) {
+      const randomParticipant =
+        availableParticipants[
+          Math.floor(Math.random() * availableParticipants.length)
+        ];
+      const globalIndex = participants.findIndex(
+        (p) => p.uuid === randomParticipant?.uuid,
+      );
+      setPrizeNumber(globalIndex);
+      setIsSpinning(true);
+      setWinner(null);
+      requestAutoSave({ silent: true });
+    }
+  }, [participants, isSpinning, requestAutoSave]);
 
   const closeSuccessAlert = useCallback(() => {
     setShowSuccessAlert(false);
@@ -229,6 +321,16 @@ export function useRoulettePresenter({ roulette }: Props) {
       router.replace(newUrl);
     }
   }, [searchParams, roulette?.hash, router]);
+
+  useEffect(() => {
+    if (!autoSaveEnabled) return;
+
+    const serializedParticipants = serializeParticipants(participants);
+    if (serializedParticipants === participantsSnapshotRef.current) return;
+
+    participantsSnapshotRef.current = serializedParticipants;
+    requestAutoSave({ reason: "Changes auto-saved." });
+  }, [participants, autoSaveEnabled, requestAutoSave, serializeParticipants]);
 
   const wheelData = useMemo(
     () =>
@@ -269,6 +371,18 @@ export function useRoulettePresenter({ roulette }: Props) {
     }
   }, [winner, spinRoulette]);
 
+  const toggleAutoSave = useCallback((enabled: boolean) => {
+    setAutoSaveEnabled(enabled);
+    participantsSnapshotRef.current = serializeParticipants(participants);
+    void saveState({
+      showAlert: false,
+      reason: enabled
+        ? "Auto-save turned on."
+        : "Auto-save turned off.",
+      autoSaveEnabledOverride: enabled,
+    });
+  }, [participants, saveState, serializeParticipants]);
+
   return {
     participants,
     newParticipantName,
@@ -281,6 +395,7 @@ export function useRoulettePresenter({ roulette }: Props) {
     editName,
     emojiPickerPosition,
     emojiPickerRef,
+    autoSaveEnabled,
     updateNewParticipantName,
     addParticipant,
     removeParticipant,
@@ -299,5 +414,7 @@ export function useRoulettePresenter({ roulette }: Props) {
     savedUrl,
     closeSuccessAlert,
     retryWinner,
+    toggleAutoSave,
+    requestAutoSave,
   };
 }

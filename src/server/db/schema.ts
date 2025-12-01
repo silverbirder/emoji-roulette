@@ -13,6 +13,7 @@ export const roulettes = createTable(
   {
     id: serial("id").primaryKey(),
     hash: varchar("hash", { length: 256 }).notNull(),
+    autoSaveEnabled: boolean("auto_save_enabled").default(false).notNull(),
   },
   (roulette) => ({
     hashIndex: index("hash_idx").on(roulette.hash),

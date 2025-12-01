@@ -6,6 +6,7 @@ import { type Metadata } from "next";
 import { TRPCReactProvider } from "@/trpc/react";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { Footer } from "@/components/footer";
+import { Toaster } from "@/components/ui/toaster";
 
 const baseUrl = process.env.BASE_URL ?? "https://emoji-roulette.vercel.app";
 
@@ -37,6 +38,7 @@ export default function RootLayout({
         <main className="flex w-full max-w-2xl flex-grow items-center justify-center px-4">
           <TRPCReactProvider>{children}</TRPCReactProvider>
         </main>
+        <Toaster />
         <Footer />
         {process.env.GA_ID && <GoogleAnalytics gaId={process.env.GA_ID} />}
       </body>

@@ -1,0 +1,132 @@
+{
+  "id": "5f7f6f0b-6e9d-4d9e-90a0-5c3c31d0d1a2",
+  "prevId": "82728df8-eb38-4451-af9a-62bcfa3c22c7",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.emoji-roulette_roulette_participant": {
+      "name": "emoji-roulette_roulette_participant",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "participant_name": {
+          "name": "participant_name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "emoji": {
+          "name": "emoji",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_hit": {
+          "name": "is_hit",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "roulette_id": {
+          "name": "roulette_id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "roulette_id_idx": {
+          "name": "roulette_id_idx",
+          "columns": [
+            {
+              "expression": "roulette_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "emoji-roulette_roulette_participant_roulette_id_emoji-roulette_roulette_id_fk": {
+          "name": "emoji-roulette_roulette_participant_roulette_id_emoji-roulette_roulette_id_fk",
+          "tableFrom": "emoji-roulette_roulette_participant",
+          "tableTo": "emoji-roulette_roulette",
+          "columnsFrom": [
+            "roulette_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.emoji-roulette_roulette": {
+      "name": "emoji-roulette_roulette",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "hash": {
+          "name": "hash",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "auto_save_enabled": {
+          "name": "auto_save_enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "hash_idx": {
+          "name": "hash_idx",
+          "columns": [
+            {
+              "expression": "hash",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

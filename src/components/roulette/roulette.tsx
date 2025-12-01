@@ -35,6 +35,7 @@ type Props = {
   roulette?: {
     id: number;
     hash: string;
+    autoSaveEnabled: boolean;
     participants: {
       id: number;
       participantName: string;
@@ -76,6 +77,8 @@ export const Roulette = ({ roulette }: Props) => {
     savedUrl,
     closeSuccessAlert,
     retryWinner,
+    autoSaveEnabled,
+    toggleAutoSave,
   } = useRoulettePresenter({ roulette });
 
   return (
@@ -108,7 +111,14 @@ export const Roulette = ({ roulette }: Props) => {
       <Card className="space-y-8">
         <CardHeader className="sticky top-0 z-20 flex flex-row items-center justify-between rounded-lg bg-background/80 backdrop-blur-sm">
           <CardTitle className="text-2xl font-bold">Emoji Roulette</CardTitle>
-          <div className="flex space-x-2">
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 rounded-full bg-muted px-3 py-1 text-sm font-medium">
+              <span className="text-muted-foreground">Auto Save</span>
+              <Switch
+                checked={autoSaveEnabled}
+                onCheckedChange={(checked) => toggleAutoSave(checked)}
+              />
+            </div>
             <Button
               variant="outline"
               size="icon"
@@ -121,7 +131,7 @@ export const Roulette = ({ roulette }: Props) => {
             <Button
               variant="outline"
               size="icon"
-              onClick={saveState}
+              onClick={() => void saveState()}
               title="Save State"
               className="text-green-600 hover:text-green-700"
             >
@@ -154,7 +164,7 @@ export const Roulette = ({ roulette }: Props) => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={saveState}
+                      onClick={() => void saveState()}
                       className="bg-white/10 text-white hover:bg-white/20 hover:text-white"
                     >
                       <Save className="mr-2 h-4 w-4" />

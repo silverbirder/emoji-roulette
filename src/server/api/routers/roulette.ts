@@ -9,6 +9,7 @@ export const rouletteRouter = createTRPCRouter({
     .input(
       z.object({
         hash: z.string().optional(),
+        autoSaveEnabled: z.boolean().optional(),
         participants: z.array(
           z.object({
             id: z.number().optional(),
@@ -21,6 +22,7 @@ export const rouletteRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { hash: _hash, participants } = input;
+      const autoSaveEnabled = input.autoSaveEnabled ?? false;
 
       let rouletteId;
       let hash;
@@ -42,7 +44,7 @@ export const rouletteRouter = createTRPCRouter({
         hash = randomBytes(16).toString("hex");
         const [newRoulette] = await ctx.db
           .insert(roulettes)
-          .values({ hash })
+          .values({ hash, autoSaveEnabled })
           .returning();
 
         rouletteId = newRoulette?.id;
@@ -82,6 +84,11 @@ export const rouletteRouter = createTRPCRouter({
             }
           }
         }
+
+        await ctx.db
+          .update(roulettes)
+          .set({ autoSaveEnabled })
+          .where(eq(roulettes.id, rouletteId));
 
         await ctx.db
           .delete(rouletteParticipants)
