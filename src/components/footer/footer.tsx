@@ -5,7 +5,7 @@ export const Footer = () => {
 
   return (
     <footer className="my-8 w-full border-t py-4">
-      <div className="mx-auto flex flex-row items-center justify-between px-4 text-xs">
+      <div className="mx-auto flex flex-col items-center justify-between px-4 text-xs gap-2">
         <p className="text-gray-600">
           © {currentYear} silverbirder. All rights reserved.
         </p>
@@ -23,6 +23,13 @@ export const Footer = () => {
             prefetch={false}
           >
             My Services
+          </Link>
+          <Link
+            href="https://fequest.vercel.app/5"
+            target="_blank"
+            prefetch={false}
+          >
+            Feature Requests
           </Link>
         </nav>
       </div>
